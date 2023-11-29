@@ -15,7 +15,11 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
 		lib/Shader.h
         lib/Transform.cpp
         lib/Transform.h
-		lib/Vertex.h)
+		lib/Vertex.h
+		lib/Camera.cpp
+		lib/Camera.h
+		lib/Model.cpp
+		lib/Model.h)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 target_compile_definitions(${PROJECT_NAME} PRIVATE LIBRARY_SUFFIX="")
