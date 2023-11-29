@@ -12,7 +12,9 @@ file(GLOB_RECURSE HEADER_FILES
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
         lib/ImGuiInit.h
 		lib/Shader.cpp
-		lib/Shader.h)
+		lib/Shader.h
+        lib/Transform.cpp
+        lib/Transform.h)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 target_compile_definitions(${PROJECT_NAME} PRIVATE LIBRARY_SUFFIX="")
