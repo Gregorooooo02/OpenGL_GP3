@@ -19,7 +19,9 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
 		lib/Camera.cpp
 		lib/Camera.h
 		lib/Model.cpp
-		lib/Model.h)
+		lib/Model.h
+		lib/Mesh.cpp
+		lib/Mesh.h)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 target_compile_definitions(${PROJECT_NAME} PRIVATE LIBRARY_SUFFIX="")
