@@ -46,7 +46,7 @@ int main() {
         processInput(window);
 
         // Rendering commands here
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // Set clear color
+        glClearColor(0.5f, 1.0f, 1.0, 1.0f); // Set clear color to blue
         glClear(GL_COLOR_BUFFER_BIT); // Clear color buffer
 
         // Swap buffers and poll events
@@ -62,5 +62,8 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 void processInput(GLFWwindow* window) {
-
+    // Close window when escape key is pressed
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, true);
+    }
 }
