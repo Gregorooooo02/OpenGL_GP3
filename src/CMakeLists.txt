@@ -22,7 +22,9 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
 		lib/Model.h
 		lib/Mesh.cpp
 		lib/Mesh.h
-		lib/Texture.h)
+		lib/Texture.h
+		lib/Entity.cpp
+		lib/Entity.h)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 target_compile_definitions(${PROJECT_NAME} PRIVATE LIBRARY_SUFFIX="")
