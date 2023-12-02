@@ -33,6 +33,7 @@ public:
     Model(std::string const &path, bool gamma = false);
     Model() {}
     void draw(Shader &shader, Transform &transform);
+    void draw(Shader &shader);
 private:
     void loadModel(std::string const &path);
     void processNode(aiNode *node, const aiScene *scene);

@@ -7,6 +7,7 @@
 #include "lib/Shader.h"
 #include "lib/Camera.h"
 #include "lib/Model.h"
+#include "lib/Entity.h"
 
 #include <iostream>
 #include <vector>
@@ -119,7 +120,10 @@ int main() {
     glEnable(GL_DEPTH_TEST); // Enable depth testing
 
     // Shader setup
+    Shader shader("res/shaders/default.vert", "res/shaders/default.frag");
     Shader skyboxShader("res/shaders/skybox.vert", "res/shaders/skybox.frag");
+
+    Model grassModel("res/models/grass.obj");
 
     // Skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
@@ -148,6 +152,9 @@ int main() {
         deltaTime = currentFrame - lastFrame; // Calculate time difference between current and last frame
         lastFrame = currentFrame; // Set last frame time to current frame time
 
+        // Process GLFW events
+        glfwPollEvents();
+
         // Input
         processInput(window);
 
@@ -155,9 +162,19 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Set clear color to blue
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color buffer
 
-        glm::mat4 model = glm::mat4(1.0f);
+        // Draw model
+        shader.use();
         glm::mat4 view = camera.getViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
+
+        // Draw grass
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f)); // Translate grass to ground
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // Scale grass
+        shader.setMat4("model", model);
+        grassModel.draw(shader);
 
         // Draw skybox
         glDepthFunc(GL_LEQUAL);
