@@ -120,7 +120,7 @@ int main() {
     glEnable(GL_DEPTH_TEST); // Enable depth testing
 
     // Shader setup
-    Shader shader("res/shaders/default.vert", "res/shaders/default.frag");
+    Shader grassShader("res/shaders/grass.vert", "res/shaders/grass.frag");
     Shader skyboxShader("res/shaders/skybox.vert", "res/shaders/skybox.frag");
 
     Model grassModel("res/models/grass/grass.obj");
@@ -138,7 +138,7 @@ int main() {
     // Load skybox texture
     unsigned int cubemapTexture = loadCubemap(faces);
 
-    // Set skybox shader uniforms
+    // Set skybox grassShader uniforms
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
@@ -162,19 +162,18 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Set clear color to blue
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color buffer
 
-        // Draw model
-        shader.use();
+        // Draw grass
+        grassShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
         glm::mat4 view = camera.getViewMatrix();
-        shader.setMat4("projection", projection);
-        shader.setMat4("view", view);
+        grassShader.setMat4("projection", projection);
+        grassShader.setMat4("view", view);
 
-        // Draw grass
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f)); // Translate grass to ground
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // Scale grass
-        shader.setMat4("model", model);
-        grassModel.draw(shader);
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f)); // Translate model to origin
+        model = glm::scale(model, glm::vec3(1.0f)); // Scale model 1x
+        grassShader.setMat4("model", model);
+        grassModel.draw(grassShader);
 
         // Draw skybox
         glDepthFunc(GL_LEQUAL);
@@ -256,17 +255,17 @@ unsigned int loadCubemap(std::vector<std::string> faces) {
         unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0); // Load image
         if (data) {
             glTexImage2D // Generate texture
-            (
-                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, // Texture target
-                0, // Mipmap level
-                GL_RGBA, // Format
-                width, // Width
-                height, // Height
-                0, // Always 0
-                GL_RGBA, // Format
-                GL_UNSIGNED_BYTE, // Data type
-                data // Image data
-            );
+                    (
+                            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, // Texture target
+                            0, // Mipmap level
+                            GL_RGBA, // Format
+                            width, // Width
+                            height, // Height
+                            0, // Always 0
+                            GL_RGBA, // Format
+                            GL_UNSIGNED_BYTE, // Data type
+                            data // Image data
+                    );
             stbi_image_free(data); // Free image data
         } else {
             std::cout << "Failed to load cubemap texture: " << faces[i] << std::endl;
