@@ -13,8 +13,8 @@
 #include <vector>
 #include <string>
 
-const unsigned int SCR_WIDTH = 1400;
-const unsigned int SCR_HEIGHT = 1000;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 2.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -123,7 +123,7 @@ int main() {
     Shader shader("res/shaders/default.vert", "res/shaders/default.frag");
     Shader skyboxShader("res/shaders/skybox.vert", "res/shaders/skybox.frag");
 
-    Model grassModel("res/models/grass.obj");
+    Model grassModel("res/models/grass/grass.obj");
 
     // Skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
@@ -164,10 +164,10 @@ int main() {
 
         // Draw model
         shader.use();
-        glm::mat4 view = camera.getViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
-        shader.setMat4("view", view);
+        glm::mat4 view = camera.getViewMatrix();
         shader.setMat4("projection", projection);
+        shader.setMat4("view", view);
 
         // Draw grass
         glm::mat4 model = glm::mat4(1.0f);
