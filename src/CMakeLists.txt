@@ -25,6 +25,8 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
 		lib/Texture.h
 		lib/Entity.cpp
 		lib/Entity.h
+        lib/Skybox.cpp
+        lib/Skybox.h
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
