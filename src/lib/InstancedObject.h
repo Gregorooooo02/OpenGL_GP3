@@ -14,7 +14,6 @@ public:
 
     void update() override;
     void draw() override;
-    void addInstanceEntity(const Entity &entity);
     std::vector<Entity*> instanceEntities;
 };
 
