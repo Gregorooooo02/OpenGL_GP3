@@ -8,6 +8,7 @@
 #include "Shader.h"
 #include "Vertex.h"
 #include "Texture.h"
+#include "Entity.h"
 
 #include <string>
 #include <vector>
@@ -21,17 +22,19 @@ public:
     unsigned int VAO;
     unsigned int instanceMatricesBuffer = 0;
 
-    Mesh() {}
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, const glm::mat4* instanceMatricesBuffer = nullptr, const unsigned instanceCount = 1);
+    Mesh() = default;
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, std::vector<Entity>* instanceOffsets = nullptr);
 
     void draw(Shader &shader);
-    void drawInstanced(Shader& shader, const unsigned int amount) const;
+    void updateInstanceMatrices();
 
-    void setupMesh(const glm::mat4* instanceMatrices = nullptr, const unsigned int instanceCount = 1);
-    void setupInstancedMesh(const glm::mat4* instanceMatrices, const unsigned int instanceCount);
+    void setupMesh();
     void refreshMeshData();
 private:
+    std::vector<Entity>* instanceOffsets = nullptr;
     unsigned int VBO, EBO;
+    unsigned int instanceVBO;
+    int indexCount;
 };
 
 

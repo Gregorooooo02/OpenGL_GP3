@@ -1,7 +1,13 @@
 #include "Model.h"
 
-Model::Model(char *path, bool gamma, const glm::mat4 *instanceMatrices, unsigned int amount) {
+Model::Model(char *path, bool gamma, std::vector<Entity>* instanceOffsets) : gammaCorrection(gamma) {
+    this -> isInstanced = isInstanced;
+    this -> instanceOffsets = instanceOffsets;
     loadModel(path);
+}
+
+Model::Model() {
+    meshes.emplace_back(Mesh());
 }
 
 void Model::draw(Shader &shader) {
@@ -10,9 +16,9 @@ void Model::draw(Shader &shader) {
     }
 }
 
-void Model::drawInstanced(Shader &shader, unsigned int amount) {
+void Model::updateInstanceMatrices() {
     for (unsigned int i = 0; i < meshes.size(); i++) {
-        meshes[i].drawInstanced(shader, amount);
+        meshes[i].updateInstanceMatrices();
     }
 }
 
@@ -114,7 +120,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 
 
 
-    return Mesh(vertices, indices, textures);
+    return Mesh(vertices, indices, textures, instanceOffsets);
 }
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName) {

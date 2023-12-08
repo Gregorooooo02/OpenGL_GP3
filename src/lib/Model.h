@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include "Transform.h"
+#include "Entity.h"
 
 #include <iostream>
 #include <vector>
@@ -28,11 +29,16 @@ public:
     std::vector<Mesh> meshes;
     std::string directory;
     bool gammaCorrection;
+    bool isInstanced;
 
-    Model(char *path, bool gamma = false, const glm::mat4* instanceMatrices = nullptr, unsigned int amount = 1);
+    Entity modelEntity;
+
+    Model(char *path, bool gamma = false, std::vector<Entity>* instanceOffsets = nullptr);
+    Model();
     void draw(Shader &shader);
-    void drawInstanced(Shader &shader, unsigned int amount);
+    void updateInstanceMatrices();
 private:
+    std::vector<Entity>* instanceOffsets = nullptr;
     void loadModel(std::string const &path);
     void processNode(aiNode *node, const aiScene *scene);
     Mesh processMesh(aiMesh *mesh, const aiScene *scene);

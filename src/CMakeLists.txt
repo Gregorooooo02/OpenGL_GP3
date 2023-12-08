@@ -27,10 +27,6 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
 		lib/Entity.h
         lib/Skybox.cpp
         lib/Skybox.h
-        lib/Object.cpp
-        lib/Object.h
-		lib/InstancedObject.cpp
-		lib/InstancedObject.h
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
