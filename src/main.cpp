@@ -64,9 +64,10 @@ int main() {
     glEnable(GL_DEPTH_TEST); // Enable depth testing
 
     // Shader setup
-    Shader grassShader("res/shaders/grass.vert", "res/shaders/grass.frag");
     Shader skyboxShader("res/shaders/skybox.vert", "res/shaders/skybox.frag");
-    Shader houseShader("res/shaders/house.vert", "res/shaders/house.frag");
+    Shader lightShader("res/shaders/light.vert", "res/shaders/light.frag");
+    Shader basicShader("res/shaders/basic.vert", "res/shaders/basic.frag");
+    Shader textureShader("res/shaders/texture.vert", "res/shaders/light.frag");
 
     // Model setup (grass)
     auto grassModel = new Model("res/models/grass/grass.obj");
