@@ -65,6 +65,7 @@ int main() {
     // Shader setup
     Shader grassShader("res/shaders/grass.vert", "res/shaders/grass.frag");
     Shader skyboxShader("res/shaders/skybox.vert", "res/shaders/skybox.frag");
+    Shader houseShader("res/shaders/house.vert", "res/shaders/house.frag");
 
     // Model setup (grass)
     Model grassModel("res/models/grass/grass.obj");
@@ -80,6 +81,10 @@ int main() {
     // Set skybox shader uniforms
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
+
+    // Let's create an instance rendering for the house and roof
+    Entity root;
+    std::list<Entity*> children;
 
     // Initialize ImGui
     init_imgui(window);
@@ -173,6 +178,12 @@ void processInput(GLFWwindow* window) {
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera.processKeyboard(RIGHT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        camera.processKeyboard(UP, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        camera.processKeyboard(DOWN, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
