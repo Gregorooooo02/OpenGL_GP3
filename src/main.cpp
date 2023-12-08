@@ -84,7 +84,26 @@ int main() {
     skyboxShader.setInt("skybox", 0);
 
     // Instance rendering of houses
+    std::vector<Entity*> houses;
+    std::vector<Entity*> roofs;
 
+    int rows = 200, cols = 200;
+    int amount = rows * cols;
+
+    glm::mat4 temp = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, -5.0f));
+    for (auto i = 0; i < cols; i++) {
+        glm::mat4 model(1.0f);
+        for (auto j = 0; j < rows; j++) {
+            auto houses = new Entity();
+            auto roofs = new Entity();
+
+            temp = glm::translate(temp, glm::vec3(3.0f, 0.0f, 0.0f));
+            model = glm::translate(temp, glm::vec3(0.0f, 1.5f, 0.0f));
+
+            houses ->setModelMatrix(model);
+
+        }
+    }
 
     // Initialize ImGui
     init_imgui(window);
