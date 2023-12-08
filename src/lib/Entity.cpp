@@ -1,53 +1,39 @@
 #include "Entity.h"
 
-Entity::Entity() {
-    this -> localTransform = glm::mat4(1.0f);
-    this -> worldTransform = glm::mat4(1.0f);
-}
-
-Entity::Entity(glm::mat4 parentTransform) {
-    this -> localTransform = parentTransform;
-    this -> worldTransform = parentTransform;
+Entity::Entity(Entity *parent) {
+    parent->addChild(this);
 }
 
 void Entity::addChild(Entity *child) {
-    children.push_back(child);
-    child -> recalculate(worldTransform);
+    children.emplace_back(child);
+    children.back()->parent = this;
 }
 
-void Entity::recalculate(glm::mat4 parentTransform) {
-    worldTransform = parentTransform * localTransform;
-    for (auto &child : children) {
-        child -> recalculate(worldTransform);
+void Entity::draw() {
+    if (model != nullptr) {
+        model->draw(*shader, transform);
     }
 }
 
-void Entity::reset() {
-    localTransform = glm::mat4(1.0f);
-    recalculate();
+void Entity::updateSelfAndChild() {
+    if (transform.isDirty()) {
+        forceUpdateSelfAndChild();
+        return;
+    }
+
+    for (auto&& child : children) {
+        child->updateSelfAndChild();
+    }
 }
 
-void Entity::simulate() {
+void Entity::forceUpdateSelfAndChild() {
+    if (parent) {
+        transform.computeModelMatrix(parent->transform.getModelMatrix());
+    } else {
+        transform.computeModelMatrix();
+    }
 
-}
-
-void Entity::move(glm::vec3 value) {
-    localTransform = glm::translate(localTransform, value);
-    recalculate();
-}
-
-void Entity::rotate(glm::vec3 value) {
-    localTransform = glm::rotate(localTransform, glm::radians(value.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    localTransform = glm::rotate(localTransform, glm::radians(value.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    localTransform = glm::rotate(localTransform, glm::radians(value.z), glm::vec3(0.0f, 0.0f, 1.0f));
-    recalculate();
-}
-
-void Entity::scale(glm::vec3 value) {
-    localTransform = glm::scale(localTransform, value);
-    recalculate();
-}
-
-glm::mat4 Entity::getWorldTransform() {
-    return worldTransform;
+    for (auto&& child : children) {
+        child->forceUpdateSelfAndChild();
+    }
 }

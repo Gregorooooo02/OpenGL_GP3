@@ -13,7 +13,6 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include "Transform.h"
-#include "Entity.h"
 
 #include <iostream>
 #include <vector>
@@ -29,16 +28,13 @@ public:
     std::vector<Mesh> meshes;
     std::string directory;
     bool gammaCorrection;
-    bool isInstanced;
 
-    Entity modelEntity;
-
-    Model(char *path, bool gamma = false, std::vector<Entity>* instanceOffsets = nullptr);
-    Model();
+    Model(char *path, bool gamma = false);
+    Model(std::string const &path, bool gamma = false);
+    Model() {}
+    void draw(Shader &shader, Transform &transform);
     void draw(Shader &shader);
-    void updateInstanceMatrices();
 private:
-    std::vector<Entity>* instanceOffsets = nullptr;
     void loadModel(std::string const &path);
     void processNode(aiNode *node, const aiScene *scene);
     Mesh processMesh(aiMesh *mesh, const aiScene *scene);

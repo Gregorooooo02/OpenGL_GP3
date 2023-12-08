@@ -1,60 +1,48 @@
 #include "Mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures,
-           std::vector<Entity> *instanceOffsets) {
-    this->vertices = std::move(vertices);
-    this->indices = std::move(indices);
-    this->textures = std::move(textures);
-    this->instanceOffsets = instanceOffsets;
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) {
+    this -> vertices = vertices;
+    this -> indices = indices;
+    this -> textures = textures;
 
     setupMesh();
 }
 
 void Mesh::setupMesh() {
-    indexCount = indices.size();
-
+    // Create buffers/arrays
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-
     glGenBuffers(1, &EBO);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-
     glBindVertexArray(VAO);
+
+    // Load data into vertex buffers
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-    // Vertex positions
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+
+    // Set th vertex attribute pointers
+    // Vertex Positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) nullptr);
-    // Vertex normals
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) nullptr);
+    // Vertex Normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
-    // Vertex texture coordinates
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Normal));
+    // Vertex Texture Coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
-
-    glGenBuffers(1, &instanceVBO);
-    updateInstanceMatrices();
-
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, TexCoords));
+    // Vertex Tangent
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void *) nullptr);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Tangent));
+    // Vertex Bitangent
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void *) (sizeof(glm::vec4)));
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void *) (2 * sizeof(glm::vec4)));
-    glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void *) (3 * sizeof(glm::vec4)));
-
-    glVertexAttribDivisor(3, 1);
-    glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);
-    glVertexAttribDivisor(6, 1);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Bitangent));
 
     glBindVertexArray(0);
 }
+
 
 void Mesh::refreshMeshData() {
     glBindVertexArray(VAO);
@@ -95,24 +83,4 @@ void Mesh::draw(Shader &shader) {
     glBindVertexArray(0);
 
     glActiveTexture(GL_TEXTURE0);
-}
-
-void Mesh::updateInstanceMatrices() {
-    if (instanceOffsets != nullptr) {
-        glm::mat4* matrices = new glm::mat4[instanceOffsets->size()];
-        for (int i = 0; i < instanceOffsets->size(); i++) {
-            matrices[i] = instanceOffsets->at(i).getWorldTransform();
-        }
-
-        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-        glBufferData(GL_ARRAY_BUFFER, instanceOffsets->size() * sizeof(glm::mat4), matrices, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        delete[] matrices;
-    } else {
-        glm::mat4 identity(1.0f);
-        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4), &identity, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
 }

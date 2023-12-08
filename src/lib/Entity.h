@@ -1,33 +1,34 @@
 #ifndef GP_3_ENTITY_H
 #define GP_3_ENTITY_H
 
-#include "glm/trigonometric.hpp"
-#include "glm/gtc//matrix_transform.hpp"
-#include "glm/gtx/matrix_decompose.hpp"
-
 #include "Model.h"
 #include "Transform.h"
 
+#include <list>
+
 class Entity {
 public:
-    Entity();
-    Entity(glm::mat4 parentTransform = glm::mat4(1.0f));
+    // Scene graph
+    std::list<Entity*> children;
+    Entity* parent = nullptr;
 
-    void addChild(Entity* child);
-    void recalculate(glm::mat4 parentTransform = glm::mat4(1.0f));
+    // Space information
+    Shader *shader = nullptr;
+    Model *model = nullptr;
+    Transform transform;
 
-    void reset();
-    void simulate();
-    void move(glm::vec3 value);
-    void rotate(glm::vec3 value);
-    void scale(glm::vec3 value);
+    // Constructor
+    Entity() {}
+    Entity(Entity *parent);
 
-    glm::mat4 getWorldTransform();
-
-    glm::mat4 localTransform;
-    glm::mat4 worldTransform;
-private:
-    std::vector<Entity*> children;
+    // Add a child to the scene graph
+    void addChild(Entity *child);
+    // Draw the entity
+    void draw();
+    // Update transform if it was changed
+    void updateSelfAndChild();
+    // Force update transform
+    void forceUpdateSelfAndChild();
 };
 
 

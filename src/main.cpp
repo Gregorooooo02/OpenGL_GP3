@@ -9,16 +9,15 @@
 #include "lib/Model.h"
 #include "lib/Entity.h"
 #include "lib/Skybox.h"
-#include "lib/Object.h"
-#include "lib/InstancedObject.h"
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
-Camera camera(glm::vec3(0.0f, 5.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 2.0f));
 double lastX = SCR_WIDTH / 2.0f;
 double lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -60,15 +59,20 @@ int main() {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1; // Terminate program
     }
+    // Configure global OpenGL state
+    glEnable(GL_DEPTH_TEST); // Enable depth testing
 
     // Shader setup
+    Shader grassShader("res/shaders/grass.vert", "res/shaders/grass.frag");
     Shader skyboxShader("res/shaders/skybox.vert", "res/shaders/skybox.frag");
-    Shader lightShader("res/shaders/light.vert", "res/shaders/light.frag");
-    Shader basicShader("res/shaders/basic.vert", "res/shaders/basic.frag");
+    Shader houseShader("res/shaders/house.vert", "res/shaders/house.frag");
 
-    glEnable(GL_DEPTH_TEST); // Enable depth testing
-    glEnable(GL_CULL_FACE); // Enable face culling
-    glCullFace(GL_BACK); // Cull back faces
+    // Model setup (grass)
+    Model grassModel("res/models/grass/grass.obj");
+
+    // Model setup (house);
+    Model houseBodyModel("res/models/house_body/house_body.obj");
+    Model houseRoofModel("res/models/house_roof/house_roof.obj");
 
     // Skybox setup
     Skybox skybox;
@@ -77,6 +81,10 @@ int main() {
     // Set skybox shader uniforms
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
+
+    // Let's create an instance rendering for the house and roof
+    Entity root;
+    std::list<Entity*> children;
 
     // Initialize ImGui
     init_imgui(window);
@@ -90,6 +98,7 @@ int main() {
 
         // Process GLFW events
         glfwPollEvents();
+
         // Input
         processInput(window);
 
@@ -97,20 +106,32 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Set clear color to blue
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color buffer
 
+        // Draw grass
+        grassShader.use();
+        glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+        glm::mat4 view = camera.getViewMatrix();
+        grassShader.setMat4("projection", projection);
+        grassShader.setMat4("view", view);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f)); // Translate model to origin
+        model = glm::scale(model, glm::vec3(1.0f)); // Scale model 1x
+        grassShader.setMat4("model", model);
+        grassModel.draw(grassShader);
+
         // Draw skybox
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
-        VP = glm::mat4(glm::mat3(camera.getViewMatrix()));
-        skyboxShader.setMat4("view", VP);
+        view = glm::mat4(glm::mat3(camera.getViewMatrix()));
+        skyboxShader.setMat4("view", view);
         skyboxShader.setMat4("projection", projection);
         skybox.draw();
 
         // Swap buffers and poll events
-        glfwMakeContextCurrent(window);
-
-        glfwMakeContextCurrent(window);
         glfwSwapBuffers(window);
+        glfwPollEvents();
     }
+
     // Terminate GLFW
     glfwTerminate();
     return 0;
@@ -165,7 +186,6 @@ void processInput(GLFWwindow* window) {
         camera.processKeyboard(DOWN, deltaTime);
     }
 
-    // Camera speed modifiers
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         camera.movementSpeed = 10.0f;
     } else {
