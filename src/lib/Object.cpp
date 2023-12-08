@@ -1,6 +1,6 @@
 #include "Object.h"
 
-Object::Object(Model *model, Shader *shader) : model(model), shader(shader) {}
+Object::Object(Model* model, Shader* shader) : model(model), shader(shader) {}
 
 Object::Object(char* modelPath, Shader *shader) : model(new Model(modelPath)), shader(shader) {}
 

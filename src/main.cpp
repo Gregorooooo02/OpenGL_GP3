@@ -9,10 +9,11 @@
 #include "lib/Model.h"
 #include "lib/Entity.h"
 #include "lib/Skybox.h"
+#include "lib/Object.h"
+#include "lib/InstancedObject.h"
 
 #include <iostream>
 #include <vector>
-#include <string>
 
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
@@ -30,7 +31,6 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
-unsigned int generateInstance(unsigned int amount, glm::mat4* matrices, Model* loadedModel);
 
 int main() {
     // Initialize GLFW
@@ -69,11 +69,11 @@ int main() {
     Shader houseShader("res/shaders/house.vert", "res/shaders/house.frag");
 
     // Model setup (grass)
-    Model grassModel("res/models/grass/grass.obj");
+    auto grassModel = new Model("res/models/grass/grass.obj");
 
     // Model setup (house);
-    Model houseBodyModel("res/models/house_body/house_body.obj");
-    Model houseRoofModel("res/models/house_roof/house_roof.obj");
+    auto houseBodyModel = new Model("res/models/house_body/house_body.obj");
+    auto houseRoofModel = new Model("res/models/house_roof/house_roof.obj");
 
     // Skybox setup
     Skybox skybox;
@@ -84,6 +84,9 @@ int main() {
     skyboxShader.setInt("skybox", 0);
 
     // Instance rendering of houses
+    auto neighbourhood = new Object(grassModel, &houseShader);
+    auto neighEntity = &neighbourhood -> entity;
+
     std::vector<Entity*> houses;
     std::vector<Entity*> roofs;
 
@@ -94,16 +97,27 @@ int main() {
     for (auto i = 0; i < cols; i++) {
         glm::mat4 model(1.0f);
         for (auto j = 0; j < rows; j++) {
-            auto houses = new Entity();
-            auto roofs = new Entity();
+            auto houseEntity = new Entity();
+            auto roofEntity = new Entity();
 
             temp = glm::translate(temp, glm::vec3(3.0f, 0.0f, 0.0f));
             model = glm::translate(temp, glm::vec3(0.0f, 1.5f, 0.0f));
 
-            houses ->setModelMatrix(model);
+            houseEntity -> setModelMatrix(model);
+            houseEntity -> setParent(neighEntity);
+            houses.emplace_back(houseEntity);
 
+            roofEntity -> setLocalPosition(glm::vec3(0.0f, 1.5f, 0.0f));
+            roofEntity -> setParent(houses.back());
+
+            roofs.emplace_back(roofEntity);
         }
+        temp = glm::translate(temp, glm::vec3(-1.0f * static_cast<float>(rows) * 3.0f, 0.0f, 3.0f));
     }
+    auto house = new InstancedObject(houseBodyModel, &houseShader, houses);
+    auto roof = new InstancedObject(houseRoofModel, &houseShader, roofs);
+
+    neighbourhood -> update();
 
     // Initialize ImGui
     init_imgui(window);
@@ -136,7 +150,7 @@ int main() {
         model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f)); // Translate model to origin
         model = glm::scale(model, glm::vec3(1.0f)); // Scale model 1x
         grassShader.setMat4("model", model);
-        grassModel.draw(grassShader);
+        grassModel -> draw(grassShader);
 
         // Draw skybox
         glDepthFunc(GL_LEQUAL);
@@ -147,6 +161,11 @@ int main() {
         skybox.draw();
 
         // Draw houses
+        neighEntity -> update();
+
+        neighbourhood -> draw();
+        house -> draw();
+        roof -> draw();
 
         // Swap buffers and poll events
         glfwSwapBuffers(window);
@@ -213,31 +232,4 @@ void processInput(GLFWwindow* window) {
     } else {
         camera.movementSpeed = 5.0f;
     }
-}
-
-unsigned int generateInstance(unsigned int amount, glm::mat4* matrices, Model* loadedModel) {
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &matrices[0], GL_STATIC_DRAW);
-
-    for (unsigned int i = 0; i < loadedModel->meshes.size(); i++) {
-        unsigned int VAO = loadedModel->meshes[i].VAO;
-        glBindVertexArray(VAO);
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
-        glBindVertexArray(0);
-    }
-
-    return buffer;
 }
