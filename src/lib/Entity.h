@@ -17,8 +17,10 @@ public:
     Model *model = nullptr;
     Transform transform;
 
+    glm::mat4* matrix;
+
     // Constructor
-    Entity() {}
+    Entity() {};
     Entity(Entity *parent);
 
     // Add a child to the scene graph
