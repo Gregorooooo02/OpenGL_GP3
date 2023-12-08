@@ -69,6 +69,52 @@ int main() {
     Shader basicShader("res/shaders/basic.vert", "res/shaders/basic.frag");
     Shader textureShader("res/shaders/texture.vert", "res/shaders/light.frag");
 
+    float shininess = 2.0f;
+	bool isBlinn = false;
+	float blinnExponent = 32.0f;
+
+	// Directional light properties
+	bool isDirLight = true;
+	glm::vec3 direction(0, 0, 0);
+	glm::vec3 ambient(.19f);
+	glm::vec3 diffuse(0);
+	glm::vec3 specular(0);
+
+	//Point light properties
+	bool isPointLight = false;
+	glm::vec3 pointLightPosition(0.0f);
+	glm::vec3 pointLightAmbient(1.0f);
+	glm::vec3 pointLightDiffuse(1.0f);
+	glm::vec3 pointLightSpecular(1.0f);
+	float pointLightConstant = 1.0f;
+	float pointLightLinear = .7f;
+	float pointLightQuadratic = 1.8f;
+
+	//Spotlight properties
+	bool isSpotActive = false;
+	glm::vec3 spotLightPosition(0.0f);
+	glm::vec3 spotLightDirection(0.0f);
+	glm::vec3 spotLightAmbient(1.0f);
+	glm::vec3 spotLightDiffuse(1.0f);
+	glm::vec3 spotLightSpecular(1.0f);
+	float spotLightConstant = 1.0f;
+	float spotLightLinear = .7f;
+	float spotLightQuadratic = 1.8f;
+	float spotLightCutOff = 12.5f;
+	float spotLightOuterCutOff = 17.5f;
+
+	bool isSpot1Active = false;
+	glm::vec3 spotLight1Position(0.0f);
+	glm::vec3 spotLight1Direction(0.0f);
+	glm::vec3 spotLight1Ambient(1.0f);
+	glm::vec3 spotLight1Diffuse(1.0f);
+	glm::vec3 spotLight1Specular(1.0f);
+	float spotLight1Constant = 1.0f;
+	float spotLight1Linear = .7f;
+	float spotLight1Quadratic = 1.8f;
+	float spotLight1CutOff = 12.5f;
+	float spotLight1OuterCutOff = 17.5f;
+
     // Model setup (grass)
     auto grassModel = new Model("res/models/grass/grass.obj");
 
@@ -85,7 +131,7 @@ int main() {
     skyboxShader.setInt("skybox", 0);
 
     // Instance rendering of houses
-    auto neighbourhood = new Object(grassModel, &houseShader);
+    auto neighbourhood = new Object(grassModel, &textureShader);
     auto neighEntity = &neighbourhood -> entity;
 
     std::vector<Entity*> houses;
@@ -115,10 +161,31 @@ int main() {
         }
         temp = glm::translate(temp, glm::vec3(-1.0f * static_cast<float>(rows) * 3.0f, 0.0f, 3.0f));
     }
-    auto house = new InstancedObject(houseBodyModel, &houseShader, houses);
-    auto roof = new InstancedObject(houseRoofModel, &houseShader, roofs);
+    auto house = new InstancedObject(houseBodyModel, &lightShader, houses);
+    auto roof = new InstancedObject(houseRoofModel, &lightShader, roofs);
+
+    Object spotLightGizmo("res/models/pyramid/pyramid.obj", &basicShader);
+	Object spotLight1Gizmo("res/models/pyramid/pyramid.obj", &basicShader);
+	Object pointLight("res/models/cube/cube.obj", &basicShader);
+
+	const auto gizmoScale = glm::vec3(0.2f);
+	spotLightGizmo.entity.setLocalScale(gizmoScale);
+	spotLight1Gizmo.entity.setLocalScale(gizmoScale);
+	pointLight.entity.setLocalScale(gizmoScale);
+
+	spotLightGizmo.entity.setParent(neighEntity);
+	spotLight1Gizmo.entity.setParent(neighEntity);
+	pointLight.entity.setParent(neighEntity);
 
     neighbourhood -> update();
+
+    int chosenBuilding = 0;
+
+	glm::vec3 buildingLocalPos(0.0f);
+	glm::vec3 prevBuildingLocalPos = buildingLocalPos;
+	glm::vec3 housesLocalPos(0.0f); //house.transform->GetLocalPosition();
+	glm::vec3 prevHousesLocalPos = housesLocalPos;
+	glm::vec3 neigbourhoodLocalPos(0.0f);
 
     // Initialize ImGui
     init_imgui(window);
@@ -140,18 +207,8 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Set clear color to blue
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color buffer
 
-        // Draw grass
-        grassShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
         glm::mat4 view = camera.getViewMatrix();
-        grassShader.setMat4("projection", projection);
-        grassShader.setMat4("view", view);
-
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f)); // Translate model to origin
-        model = glm::scale(model, glm::vec3(1.0f)); // Scale model 1x
-        grassShader.setMat4("model", model);
-        grassModel -> draw(grassShader);
 
         // Draw skybox
         glDepthFunc(GL_LEQUAL);

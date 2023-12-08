@@ -34,7 +34,7 @@ void InstancedObject::prepareInstanceMatricesBuffer() {
 }
 
 void InstancedObject::updateInstanceMatricesBuffer() {
-    shader -> setMat4("model", entity.getModelMatrix());
+    shader -> setMat4("mainObjectModel", entity.getModelMatrix());
 
     std::vector<glm::mat4> matrices;
     for (const auto& entity : instanceEntities) {
