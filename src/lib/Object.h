@@ -12,7 +12,7 @@ public:
     Entity entity;
     Object() = default;
     Object(Model* model, Shader* shader);
-    Object(const std::string &modelPath, Shader* shader);
+    Object(char* modelPath, Shader* shader);
     virtual ~Object() = default;
 
     void setModel(Model* model);
