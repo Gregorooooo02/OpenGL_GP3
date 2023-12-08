@@ -1,24 +1,18 @@
 #include "Model.h"
 
-Model::Model(char *path, bool gamma) : gammaCorrection(gamma) {
+Model::Model(char *path, bool gamma, const glm::mat4 *instanceMatrices, unsigned int amount) {
     loadModel(path);
-}
-
-Model::Model(const std::string &path, bool gamma) : gammaCorrection(gamma) {
-    loadModel(path);
-}
-
-void Model::draw(Shader &shader, Transform &transform) {
-    shader.setMat4("model", transform.getModelMatrix());
-
-    for (unsigned int i = 0; i < meshes.size(); i++) {
-        meshes[i].draw(shader);
-    }
 }
 
 void Model::draw(Shader &shader) {
     for (unsigned int i = 0; i < meshes.size(); i++) {
         meshes[i].draw(shader);
+    }
+}
+
+void Model::drawInstanced(Shader &shader, unsigned int amount) {
+    for (unsigned int i = 0; i < meshes.size(); i++) {
+        meshes[i].drawInstanced(shader, amount);
     }
 }
 

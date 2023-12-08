@@ -29,11 +29,9 @@ public:
     std::string directory;
     bool gammaCorrection;
 
-    Model(char *path, bool gamma = false);
-    Model(std::string const &path, bool gamma = false);
-    Model() {}
-    void draw(Shader &shader, Transform &transform);
+    Model(char *path, bool gamma = false, const glm::mat4* instanceMatrices = nullptr, unsigned int amount = 1);
     void draw(Shader &shader);
+    void drawInstanced(Shader &shader, unsigned int amount);
 private:
     void loadModel(std::string const &path);
     void processNode(aiNode *node, const aiScene *scene);
