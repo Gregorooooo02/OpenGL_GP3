@@ -7,7 +7,22 @@
 #include <vector>
 
 class Entity {
+protected:
+    Model* model = nullptr;
+    Shader* shader = nullptr;
+public:
+    Transform transform;
 
+    Entity(const std::string& modelPath, Shader* shader);
+    Entity(Model* loadedModel, Shader* shader);
+    Entity();
+    virtual ~Entity() = default;
+
+    void setModel(Model* newModel);
+    void setShader(Shader* newShader);
+
+    virtual void draw();
+    virtual void update();
 };
 
 
