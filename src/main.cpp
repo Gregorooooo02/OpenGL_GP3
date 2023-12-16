@@ -63,9 +63,8 @@ int main() {
     glEnable(GL_DEPTH_TEST); // Enable depth testing
 
     // Shader setup
-    Shader grassShader("res/shaders/grass.vert", "res/shaders/grass.frag");
+
     Shader skyboxShader("res/shaders/skybox.vert", "res/shaders/skybox.frag");
-    Shader houseShader("res/shaders/house.vert", "res/shaders/house.frag");
 
     // Model setup (grass)
     Model grassModel("res/models/grass/grass.obj");
@@ -83,8 +82,6 @@ int main() {
     skyboxShader.setInt("skybox", 0);
 
     // Let's create an instance rendering for the house and roof
-    Entity root;
-    std::list<Entity*> children;
 
     // Initialize ImGui
     init_imgui(window);
@@ -106,18 +103,8 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Set clear color to blue
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color buffer
 
-        // Draw grass
-        grassShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
         glm::mat4 view = camera.getViewMatrix();
-        grassShader.setMat4("projection", projection);
-        grassShader.setMat4("view", view);
-
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f)); // Translate model to origin
-        model = glm::scale(model, glm::vec3(1.0f)); // Scale model 1x
-        grassShader.setMat4("model", model);
-        grassModel.draw(grassShader);
 
         // Draw skybox
         glDepthFunc(GL_LEQUAL);
