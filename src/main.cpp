@@ -63,12 +63,11 @@ int main() {
     glEnable(GL_DEPTH_TEST); // Enable depth testing
 
     // Shader setup
-
+    Shader basicShader("res/shaders/basic.vert", "res/shaders/basic.frag");
     Shader skyboxShader("res/shaders/skybox.vert", "res/shaders/skybox.frag");
 
     // Model setup (grass)
     Model grassModel("res/models/grass/grass.obj");
-
     // Model setup (house);
     Model houseBodyModel("res/models/house_body/house_body.obj");
     Model houseRoofModel("res/models/house_roof/house_roof.obj");
