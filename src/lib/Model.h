@@ -29,11 +29,9 @@ public:
     std::string directory;
     bool gammaCorrection;
 
-    Model(char *path, bool gamma = false);
-    Model(std::string const &path, bool gamma = false);
-    Model() {}
-    void draw(Shader &shader, Transform &transform);
+    Model(std::string const &path, bool gamma = false, const glm::mat4* instanceMatrices = nullptr, const unsigned int instanceCount = 1);
     void draw(Shader &shader);
+    void drawInstanced(Shader &shader, const unsigned int instanceCount);
 private:
     void loadModel(std::string const &path);
     void processNode(aiNode *node, const aiScene *scene);
@@ -41,6 +39,5 @@ private:
     std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
     unsigned int textureFromFile(const char *path, const std::string &directory, bool gamma = false);
 };
-
 
 #endif //GP_3_MODEL_H
