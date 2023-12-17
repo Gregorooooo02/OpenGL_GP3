@@ -19,7 +19,7 @@
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
-Camera camera(glm::vec3(0.0f, 0.0f, 2.0f));
+Camera camera(glm::vec3(0.0f, 5.0f, 2.0f));
 double lastX = SCR_WIDTH / 2.0f;
 double lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -177,11 +177,11 @@ int main(int, char**) {
 
     int chosenBuilding = 0;
 
-    glm::vec3 buildingLocalPos(0.0f);
+    glm::vec3 buildingLocalPos({0.0f, 0.0f, 0.0f});
     glm::vec3 prevBuildingLocalPos = buildingLocalPos;
-    glm::vec3 housesLocalPos(0.0f);
+    glm::vec3 housesLocalPos({0.0f, 0.0f, 0.0f});
     glm::vec3 prevHousesLocalPos = housesLocalPos;
-    glm::vec3 neighbourhoodLocalPos(0.0f);
+    glm::vec3 neighbourhoodLocalPos({0.0f, 0.0f, 0.0f});
 
     // Skybox setup
     Skybox skybox;
@@ -441,7 +441,7 @@ int main(int, char**) {
         const auto a = static_cast<float>(glfwGetTime());
         pointLight.transform.setLocalRotationX(15 * a);
         pointLight.transform.setLocalRotationY(15 * a);
-        pointLight.transform.setLocalPosition({10 * glm::sin(a), 10 + 10 * glm::cos(a), 0});
+        pointLight.transform.setLocalPosition({10 * glm::cos(a), 7.0f, 10 * glm::sin(a)});
 
         neighbourhoodTransform -> update();
 
