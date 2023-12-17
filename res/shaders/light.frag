@@ -40,6 +40,7 @@ struct PointLight
 	vec3 position;
 
     Attenuation att;
+
     BaseLight colors;
 };
 
@@ -72,9 +73,13 @@ uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 uniform float shininess;
 
+uniform bool isBlinn;
+uniform float blinnExponent;
+
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+float calcBlinn(vec3 lDir, vec3 vDir, vec3 normal);
 
 void main()
 {
@@ -82,6 +87,7 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
 
 	vec3 result = vec3(0.0);
+
 
 	for(int i = 0; i < NR_POINT_LIGHTS; i++)
 	{
@@ -109,7 +115,16 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+
+    float spec = 0.0f;
+    if(isBlinn)
+    {
+        spec = calcBlinn(lightDir, viewDir, normal);
+    }
+    else
+    {
+        spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    }
 
     // combine results
     vec3 ambient = light.colors.ambient * vec3(texture(texture_diffuse1, TexCoords));
@@ -126,7 +141,18 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+
+    float spec= 0.0f;
+
+    if(isBlinn)
+    {
+        spec = calcBlinn(lightDir, viewDir, normal);
+    }
+    else
+    {
+        spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    }
+
     // attenuation
     float distance = length(light.position - fragPos);
     float attenuation = calcAttenuation(light.att, distance);//1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
@@ -148,7 +174,17 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+
+    float spec = 0.0f;
+    if(isBlinn)
+    {
+        spec = calcBlinn(lightDir, viewDir, normal);
+    }
+    else
+    {
+        spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    }
+
     // attenuation
     float distance = length(light.position - fragPos);
     float attenuation = calcAttenuation(light.att, distance);//1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
@@ -166,4 +202,11 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     specular *= attenuation * intensity;
 
     return (ambient + diffuse + specular);
+}
+
+float calcBlinn(vec3 lDir, vec3 vDir, vec3 normal)
+{
+    vec3 halfwayDir = normalize(lDir + vDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0f), blinnExponent);
+    return spec;
 }
