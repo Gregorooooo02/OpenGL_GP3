@@ -9,7 +9,7 @@
 #include <vector>
 
 class Transform {
-protected:
+public:
     // Instanced VBO
     unsigned int m_instanceVBO;
 

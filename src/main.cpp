@@ -55,7 +55,7 @@ int main(int, char**) {
     glfwSetScrollCallback(window, scrollCallback); // Set callback function for mouse scroll
 
     // Tell GLFW to capture mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { // Initialize GLAD
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -128,9 +128,9 @@ int main(int, char**) {
     auto planeModel = new Model("res/models/plane/plane.obj");
 
     auto neighbourhood = new Entity(planeModel, &textureShader);
-
     auto neighbourhoodTransform = &neighbourhood -> transform;
 
+    // Create instanced transforms
     glm::mat4 tmp = glm::translate(glm::mat4(1.0f), {-400, 0, -400});
     for (auto i = 0; i < cols; i++) {
         glm::mat4 model(1.0f);
@@ -176,11 +176,40 @@ int main(int, char**) {
 
     int chosenBuilding = 0;
 
+    // Building transforms
+    // Local positions
     glm::vec3 buildingLocalPos({0.0f, 0.0f, 0.0f});
     glm::vec3 prevBuildingLocalPos = buildingLocalPos;
     glm::vec3 housesLocalPos({0.0f, 0.0f, 0.0f});
     glm::vec3 prevHousesLocalPos = housesLocalPos;
     glm::vec3 neighbourhoodLocalPos({0.0f, 0.0f, 0.0f});
+
+    // Local rotations
+    glm::vec3 buildingLocalRot({0.0f, 0.0f, 0.0f});
+    glm::vec3 prevBuildingLocalRot = buildingLocalRot;
+    glm::vec3 housesLocalRot({0.0f, 0.0f, 0.0f});
+    glm::vec3 prevHousesLocalRot = housesLocalRot;
+    glm::vec3 neighbourhoodLocalRot({0.0f, 0.0f, 0.0f});
+
+    // Local scales
+    glm::vec3 buildingLocalScale({1.0f, 1.0f, 1.0f});
+    glm::vec3 prevBuildingLocalScale = buildingLocalScale;
+    glm::vec3 housesLocalScale({1.0f, 1.0f, 1.0f});
+    glm::vec3 prevHousesLocalScale = housesLocalScale;
+    glm::vec3 neighbourhoodLocalScale({1.0f, 1.0f, 1.0f});
+
+    // Roof transforms
+    // Local positions
+    glm::vec3 roofLocalPos({0.0f, 0.0f, 0.0f});
+    glm::vec3 prevRoofLocalPos = roofLocalPos;
+
+    // Local rotations
+    glm::vec3 roofLocalRot({0.0f, 0.0f, 0.0f});
+    glm::vec3 prevRoofLocalRot = roofLocalRot;
+
+    // Local scales
+    glm::vec3 roofLocalScale({1.0f, 1.0f, 1.0f});
+    glm::vec3 prevRoofLocalScale = roofLocalScale;
 
     // Skybox setup
     Skybox skybox;
@@ -222,10 +251,16 @@ int main(int, char**) {
             ImGui::Begin("Inspector");
 
             ImGui::InputInt("Chosen building", &chosenBuilding);
+            // House transforms
             ImGui::SliderFloat3("Building local pos", glm::value_ptr(buildingLocalPos), -10.0f, 10.0f);
+            ImGui::SliderFloat("Building local rotation", glm::value_ptr(buildingLocalRot), 0.0f, 360.0f);
+            ImGui::SliderFloat3("Building local scale", glm::value_ptr(buildingLocalScale), 0.0f, 10.0f);
+            // Roof transforms
+            ImGui::SliderFloat3("Roof local pos", glm::value_ptr(roofLocalPos), -10.0f, 10.0f);
+            ImGui::SliderFloat("Roof local rotation", glm::value_ptr(roofLocalRot), 0.0f, 360.0f);
+            ImGui::SliderFloat3("Roof local scale", glm::value_ptr(roofLocalScale), 0.0f, 10.0f);
+            // Neighbourhood transforms
             ImGui::InputFloat3("Plane local pos", glm::value_ptr(housesLocalPos));
-
-            ImGui::InputFloat3("N loc", glm::value_ptr(neighbourhoodLocalPos));
 
             ImGui::Text("MATERIAL");
             ImGui::SliderFloat("Shininess", &shininess, 0.0f, 256.0f);
@@ -360,7 +395,6 @@ int main(int, char**) {
 		textureShader.setBool("isBlinn", isBlinn);
 		textureShader.setFloat("blinnExponent", blinnExponent);
 
-
 		textureShader.setBool("dirLight.isActive", isDirLight);
 		textureShader.setVec3("dirLight.direction", direction);
 		textureShader.setVec3("dirLight.colors.ambient", ambient);
@@ -418,25 +452,63 @@ int main(int, char**) {
 		basicShader.setVec3("diffuse", pointLightDiffuse * pointLightAmbient * pointLightSpecular);
         // End of shader updates
 
+        // Update transforms
         spotLightGizmo.transform.setLocalPosition(spotLightPosition);
         spotLightGizmo.transform.setLocalRotation(spotLightDirection);
 
+        // Update transforms
         spotLight1Gizmo.transform.setLocalPosition(spotLight1Position);
         spotLight1Gizmo.transform.setLocalRotation(spotLight1Direction);
 
+        // House transforms
+        // Update transforms (position)
         if (buildingLocalPos != prevBuildingLocalPos) {
             prevBuildingLocalPos = buildingLocalPos;
             house -> instanceTransforms[chosenBuilding] -> setLocalPosition(buildingLocalPos);
         }
 
+        // Update transforms (rotation)
+        if (buildingLocalRot != prevBuildingLocalRot) {
+            prevBuildingLocalRot = buildingLocalRot;
+            house -> instanceTransforms[chosenBuilding] -> setLocalRotation(buildingLocalRot);
+        }
+
+        // Update transforms (scale)
+        if (buildingLocalScale != prevBuildingLocalScale) {
+            prevBuildingLocalScale = buildingLocalScale;
+            house -> instanceTransforms[chosenBuilding] -> setLocalScale(buildingLocalScale);
+        }
+
+        // Roof transforms
+        // Update transforms (position)
+        if (roofLocalPos != prevRoofLocalPos) {
+            prevRoofLocalPos = roofLocalPos;
+            roof -> instanceTransforms[chosenBuilding] -> setLocalPosition(roofLocalPos);
+        }
+
+        // Update transforms (rotation)
+        if (roofLocalRot != prevRoofLocalRot) {
+            prevRoofLocalRot = roofLocalRot;
+            roof -> instanceTransforms[chosenBuilding] -> setLocalRotation(roofLocalRot);
+        }
+
+        // Update transforms (scale)
+        if (roofLocalScale != prevRoofLocalScale) {
+            prevRoofLocalScale = roofLocalScale;
+            roof -> instanceTransforms[chosenBuilding] -> setLocalScale(roofLocalScale);
+        }
+
+        // Update transforms
         if (housesLocalPos != prevHousesLocalPos) {
             prevHousesLocalPos = housesLocalPos;
             neighbourhoodTransform -> setLocalPosition(housesLocalPos);
         }
 
+        // Update transforms
         house -> transform.setLocalPosition(neighbourhoodLocalPos);
         house -> transform.update();
 
+        // Update transforms for point light
         const auto a = static_cast<float>(glfwGetTime());
         pointLight.transform.setLocalRotationX(15 * a);
         pointLight.transform.setLocalRotationY(15 * a);
@@ -444,6 +516,7 @@ int main(int, char**) {
 
         neighbourhoodTransform -> update();
 
+        // Draw entities
         neighbourhood -> draw();
         house -> draw();
         roof -> draw();
