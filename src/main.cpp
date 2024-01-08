@@ -55,7 +55,7 @@ int main(int, char**) {
     glfwSetScrollCallback(window, scrollCallback); // Set callback function for mouse scroll
 
     // Tell GLFW to capture mouse
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { // Initialize GLAD
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -252,13 +252,13 @@ int main(int, char**) {
 
             ImGui::InputInt("Chosen building", &chosenBuilding);
             // House transforms
-            ImGui::SliderFloat3("Building local pos", glm::value_ptr(buildingLocalPos), -10.0f, 10.0f);
-            ImGui::SliderFloat("Building local rotation", glm::value_ptr(buildingLocalRot), 0.0f, 360.0f);
-            ImGui::SliderFloat3("Building local scale", glm::value_ptr(buildingLocalScale), 0.0f, 10.0f);
+            ImGui::SliderFloat3("Building local pos", glm::value_ptr(buildingLocalPos), -20.0f, 20.0f);
+            ImGui::SliderFloat3("Building local rotation", glm::value_ptr(buildingLocalRot), 0.0f, 360.0f);
+            ImGui::SliderFloat3("Building local scale", glm::value_ptr(buildingLocalScale), -10.0f, 10.0f);
             // Roof transforms
-            ImGui::SliderFloat3("Roof local pos", glm::value_ptr(roofLocalPos), -10.0f, 10.0f);
-            ImGui::SliderFloat("Roof local rotation", glm::value_ptr(roofLocalRot), 0.0f, 360.0f);
-            ImGui::SliderFloat3("Roof local scale", glm::value_ptr(roofLocalScale), 0.0f, 10.0f);
+            ImGui::SliderFloat3("Roof local pos", glm::value_ptr(roofLocalPos), -20.0f, 20.0f);
+            ImGui::SliderFloat3("Roof local rotation", glm::value_ptr(roofLocalRot), 0.0f, 360.0f);
+            ImGui::SliderFloat3("Roof local scale", glm::value_ptr(roofLocalScale), -10.0f, 10.0f);
             // Neighbourhood transforms
             ImGui::InputFloat3("Plane local pos", glm::value_ptr(housesLocalPos));
 
